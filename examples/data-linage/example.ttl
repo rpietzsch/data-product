@@ -1,0 +1,69 @@
+@prefix dcat:    <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dprod:   <https://ekgf.github.io/data-product-spec/dprod/> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix y-dist:  <https://y.com/distribution/> .
+@prefix y-ds:    <https://y.com/dataset/> .
+@prefix y-prod:  <https://y.com/products/> .
+@prefix y-srv:   <https://y.com/service/> .
+
+<https://y.com/data-product/company-sales/port/2025-balance-sheet> a dcat:DataService ;
+  rdfs:label               "Balance Sheet" ;
+  dcat:endpointURL         "https://y.com/data-product/company-sales/port/2025-c" ;
+  dprod:isAccessServiceOf  <https://y.com/data-product/company-sales/port/2025-balance-sheet-dist> .
+
+<https://y.com/data-product/company-sales/port/2025-balance-sheet-dist> a dcat:Distribution ;
+  dcterms:format          "https://www.iana.org/assignments/media-types/application/json" ;
+  dprod:isDistributionOf  <https://y.com/data-product/company-sales/dataset/2025-balance-sheet> .
+
+<https://y.com/data-product/company-sales> a dprod:DataProduct ;
+  dprod:outputPort  <https://y.com/data-product/company-sales/port/2025-sales> .
+
+<https://y.com/data-product/company-hr/port/2025-payroll> a dcat:DataService .
+
+<https://y.com/data-product/company-sales/dataset/2025-payroll> a dcat:Dataset ;
+  rdfs:label          "Payroll" ;
+  dcterms:conformsTo  "https://y.com/schema/Payroll" .
+
+# TODO: this property is undefined and not releated to a resource, to be clarified (or deleted?)
+#[ rdf:dataProducts  <https://y.com/data-product/company-finance> , <https://y.com/data-product/company-sales> , <https://y.com/data-product/company-hr> ] .
+
+<https://y.com/data-product/company-hr> a dprod:DataProduct ;
+  dprod:outputPort  <https://y.com/data-product/company-sales/port/2025-payroll> .
+
+<https://y.com/data-product/company-sales/dataset/2025-balance-sheet> a dcat:Dataset ;
+  dcterms:conformsTo  "https://y.com/schema/BalanceSheet" .
+
+<https://y.com/data-product/company-sales/port/2025-payroll> a dcat:DataService ;
+  rdfs:label               "Payroll" ;
+  dcat:endpointURL         "https://y.com/data-product/company-hr/port/2025-payroll" ;
+  dprod:isAccessServiceOf  <https://y.com/data-product/company-sales/port/2025-payroll-dist> .
+
+<https://y.com/data-product/company-sales/port/2025-payroll-dist> a dcat:Distribution ;
+  #dcterms:format          "https://www.iana.org/assignments/media-types/text/csv" ;
+  dcterms:format          "text/csv" ;
+  dprod:isDistributionOf  <https://y.com/data-product/company-sales/dataset/2025-payroll> .
+
+<https://y.com/data-product/company-sales/dataset/2025-sales> a dcat:Dataset ;
+  rdfs:label          "Sales" ;
+  dcterms:conformsTo  "https://y.com/schema/Sale" .
+
+<https://y.com/data-product/company-sales/port/2025-sales> a dcat:DataService ;
+  rdfs:label               "Sales" ;
+  dcat:endpointURL         "https://y.com/data-product/company-sales/port/2025-sales" ;
+  dprod:isAccessServiceOf  <https://y.com/data-product/company-sales/port/2025-sales-dist> .
+
+<https://y.com/data-product/company-sales/port/2025-sales-dist> a dcat:Distribution ;
+  #dcterms:format          "https://www.iana.org/assignments/media-types/application/json" ;
+  dcterms:format          "application/json" ;
+  dprod:isDistributionOf  <https://y.com/data-product/company-sales/dataset/2025-sales> .
+
+<https://y.com/data-product/company-finance> a dprod:DataProduct ;
+  dprod:inputPort   
+    <https://y.com/data-product/company-sales/port/2025-sales> , 
+    <https://y.com/data-product/company-hr/port/2025-payroll> ;
+  dprod:outputPort  <https://y.com/data-product/company-sales/port/2025-balance-sheet> .

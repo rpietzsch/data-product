@@ -1,0 +1,49 @@
+@prefix dcat:    <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dprod:   <https://ekgf.github.io/data-product-spec/dprod/> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix y-dist:  <https://y.com/distribution/> .
+@prefix y-ds:    <https://y.com/dataset/> .
+@prefix y-prod:  <https://y.com/products/> .
+@prefix y-srv:   <https://y.com/service/> .
+
+<https://y.com/quality-measurement-B> a rdf:QualityMeasurement ;
+  #TODO: to be defined in dprod? not in rdf:
+  dprod:computedOn       <https://y.com/products/uk-bonds/yearlyPrices> ;
+  #TODO: to be defined in dprod? not in rdf:
+  dprod:isMeasurementOf <https://y.com/quality-measurement-B-metric> ;
+  rdf:value            "false" .
+
+#TODO: to be defined in dprod? not in rdf:
+<https://y.com/quality-measurement-B-metric> a dprod:Metric ;
+  rdfs:label  "Expected distribution frequency achieved" .
+
+<https://y.com/derived-quality-measurementA> a rdf:QualityMeasurement ;
+  #TODO: to be defined in dprod? not in rdf:
+  dprod:computedOn       y-prod:uk-bonds ;
+  #TODO: to be defined in dprod? not in rdf:
+  dprod:isMeasurementOf <https://y.com/derived-quality-measurementA-metric> ;
+  rdf:value            1 .
+
+#TODO: to be defined in dprod? not in rdf:
+<https://y.com/derived-quality-measurementA-metric> a dprod:Metric ;
+  rdfs:label  "Number of stale datasets" .
+
+y-prod:uk-bonds a dprod:DataProduct ;
+  dprod:outputPort y-prod:uk-bonds-port . 
+  
+y-prod:uk-bonds-port a dcat:DataService ;
+  dcat:endpointURL         "https://y.com/uk-bonds/quality-report" ;
+  dprod:isAccessServiceOf y-prod:uk-bonds-port-dist . 
+  
+y-prod:uk-bonds-port-dist a dcat:Distribution ;
+  dprod:isDistributionOf y-prod:uk-bonds-port-dist-ds . 
+  
+y-prod:uk-bonds-port-dist-ds a dcat:Dataset ;
+  dcterms:conformsTo  "https://www.w3.org/TR/vocab-dqv/#dqv:QualityMeasurement" .
+
+<https://y.com/products/uk-bonds/yearlyPrices> a dcat:Dataset .
