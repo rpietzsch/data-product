@@ -1,0 +1,38 @@
+@prefix dcat:    <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dprod:   <https://ekgf.github.io/data-product-spec/dprod/> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix y-dist:  <https://y.com/distribution/> .
+@prefix y-ds:    <https://y.com/dataset/> .
+@prefix y-prod:  <https://y.com/products/> .
+@prefix y-srv:   <https://y.com/service/> .
+
+<https://y.com/products/uk-bonds/datasets/10-year>
+        rdf:type            dcat:Dataset ;
+        dcterms:conformsTo  "https://spec.edmcouncil.org/fibo/ontology/SEC/Debt/Bonds/CallableBond" .
+
+y-prod:uk-bonds  rdf:type  dprod:DataProduct ;
+        dprod:outputPort  <https://y.com/uk-bonds/observability-port> ;
+        dprod:outputPort  [ rdf:type                 dcat:DataService ;
+                            rdfs:label               "Main Data Port" ;
+                            dcat:endpointURL         "https://y.com/uk-10-year-bonds" ;
+                            dprod:isAccessServiceOf  [ rdf:type                dcat:Distribution ;
+                                                       dcterms:format          "https://www.iana.org/assignments/media-types/application/json" ;
+                                                       dprod:isDistributionOf  <https://y.com/products/uk-bonds/datasets/10-year>
+                                                     ]
+                          ] .
+
+<https://y.com/uk-bonds/observability-port>
+        rdf:type                 dcat:DataService ;
+        rdfs:label               "Observability Port" ;
+        dcat:endpointURL         "https://y.com/uk-bonds/observability" ;
+        dprod:isAccessServiceOf  [ rdf:type                dcat:Distribution ;
+                                   dcterms:format          "https://www.iana.org/assignments/media-types/text/turtle" ;
+                                   dprod:isDistributionOf  [ rdf:type            dcat:Dataset ;
+                                                             dcterms:conformsTo  "http://persistence.uni-leipzig.org/nlp2rdf/ontologies/rlog#Entry"
+                                                           ]
+                                 ] .

@@ -1,0 +1,70 @@
+@prefix dcat:    <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dprod:   <https://ekgf.github.io/data-product-spec/dprod/> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix y-dist:  <https://y.com/distribution/> .
+@prefix y-ds:    <https://y.com/dataset/> .
+@prefix y-prod:  <https://y.com/products/> .
+@prefix y-srv:   <https://y.com/service/> .
+
+y-prod:sba-pool-rates
+        rdf:type                dprod:DataProduct ;
+        rdf:lifecycle           "Consume" ;
+        rdf:title               "SBA Pool Rates" ;
+        dcterms:description     "Rates for SBE Pool that are Mortgage Backed Securities. The data product is provided through 3 ports, one of them proving all sba pool rates through a query to a database, another port providing EMEA only rates through an api and another one providing US only rates through a Kafka topic" ;
+        dprod:dataProductOwner  "https://www.schema.xxx/person/johnSmith"^^foaf:Agent ;
+        dprod:outputPort        y-srv:sba-pool-rate-tabular-prod1 , y-srv:sba-pool-rate-emea-api-prod1 , y-srv:sba-pool-rate-json-prod1 .
+
+y-dist:sba-pool-rate-emea-json1
+        rdf:type                dcat:Distribution ;
+        dcterms:format          "https://www.iana.org/assignments/media-types/application/json" ;
+        dprod:isDistributionOf  y-ds:sba-pool-rate-emea .
+
+y-srv:sba-pool-rate-tabular-prod1
+        rdf:type                 dcat:DataService ;
+        rdf:environment          "PROD" ;
+        rdf:sql                  "select * from ..." ;
+        dcat:endpointURL         "jdbc:oracle:thin@sd656-5656-6745.ldn.organiation.com:43534/PGPERG.WORLD" ;
+        dprod:isAccessServiceOf  y-dist:sba-pool-rate-tabular .
+
+y-dist:sba-pool-rate-tabular
+        rdf:type                dcat:Distribution ;
+        dcterms:format          "https://www.iana.org/assignments/media-types/application/sql" ;
+        dprod:isDistributionOf  y-ds:sba-pool-rate .
+
+y-ds:sba-pool-rate-emea
+        rdf:type                  dcat:Dataset ;
+        rdf:geographicalCoverage  "https://y.com/country/EMEA" ;
+        dcterms:description       "sba pool data that cover EMEA accessed through an api" ;
+        dcat:conformsTo           "https://spec.edmcouncil.org/fibo/ontology/SEC/Debt/MortgageBackedSecurities/SBA-Pool" .
+
+y-ds:sba-pool-rate-us
+        rdf:type                  dcat:Dataset ;
+        rdf:geographicalCoverage  "https://y.com/country/US" ;
+        dcat:conformsTo           "https://spec.edmcouncil.org/fibo/ontology/SEC/Debt/MortgageBackedSecurities/SBA-Pool" .
+
+y-ds:sba-pool-rate  rdf:type  dcat:Dataset ;
+        dcat:conformsTo  "https://spec.edmcouncil.org/fibo/ontology/SEC/Debt/MortgageBackedSecurities/SBA-Pool" .
+
+y-dist:sba-pool-rate-json
+        rdf:type                dcat:Distribution ;
+        rdf:schemaCompatiblity  "backwards compatible" ;
+        dcterms:conformsTo      "http://confluent-registry-y/rates-json-schema.json" ;
+        dcterms:format          "https://www.iana.org/assignments/media-types/application/json" ;
+        dprod:isDistributionOf  y-ds:sba-pool-rate-us .
+
+y-srv:sba-pool-rate-json-prod1
+        rdf:type                 dcat:DataService ;
+        dcat:endpointURL         "q1.debt.mbs.dataset.us" ;
+        dprod:isAccessServiceOf  y-dist:sba-pool-rate-json .
+
+y-srv:sba-pool-rate-emea-api-prod1
+        rdf:type                 dcat:DataService ;
+        rdf:environment          "PROD" ;
+        dcat:conformsTo          "../resources/users.yaml'" ;
+        dcat:endpointURL         "https://example.org/mbs/SBA-Pool-location-emea" ;
+        dprod:isAccessServiceOf  y-dist:sba-pool-rate-emea-json1 .

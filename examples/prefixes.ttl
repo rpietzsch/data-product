@@ -1,0 +1,13 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dprod: <https://ekgf.github.io/data-product-spec/dprod/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+@prefix y-prod: <https://y.com/products/> .
+@prefix y-srv: <https://y.com/service/> .
+@prefix y-dist: <https://y.com/distribution/> .
+@prefix y-ds: <https://y.com/dataset/> .
