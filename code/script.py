@@ -59,9 +59,6 @@ class Example:
     json: str = ''
 
 
-classes = {}
-
-
 def replace_backticks(markdown_text):
     # Regular expression to find code blocks and capture the type
     code_block_pattern = re.compile(r'```(\w+)\n(.*?)```', re.DOTALL)
@@ -98,7 +95,7 @@ def reorder_list(list_to_order, reference_list):
 
 
 # Define a function to add classes and properties to the context
-def add_to_context(uri):
+def add_to_context(uri,classes):
     if isinstance(uri, rdflib.term.URIRef):
         name = short_name(uri)
         if name.endswith("Shape"):
@@ -111,23 +108,33 @@ def add_to_context(uri):
             fill_object(class_obj)
             for s, p, o in g.triples((None, RDFS.subClassOf, uri)):
                 add_to_context(s)
-
+            
+            description = g.value(URIRef(uri), DC.description)
+                
             if hasattr(class_obj, 'targetClass'):
                 owl_class = RdfClass(name=name, uri=class_obj.targetClass)
                 context[name]["@id"] = str(owl_class.uri)
                 fill_object(owl_class)
-                if owl_class.description and owl_class.description != '':
-                    # print(f'description: {owl_class.description}')
+                if not class_obj.description and owl_class.description and owl_class.description != '':
                     class_obj.description = owl_class.description
+
+                #print(f"{class_obj.uri}")
+                if description:
+                    class_obj.description = str(description)
+                    #print(f"{class_obj.uri} SCL DEC {class_obj.description}")
 
             for s, p, o in g.triples((uri, SH.property, None)):
                 property_shape_uri = o
                 path = next(g.triples((o, SH.path, None)))
+                description = next(g.triples((o, DC.description, None)))
+                if description:
+                    description = str(description[2])
                 if path is not None:
                     o = str(path[2])
                 property_name = short_name(o)
                 property_name = property_name.replace(f'{name}-', '')
                 rdf_property = RdfProperty(name=property_name, uri=o)
+                rdf_property.description = description
                 class_obj.properties.append(rdf_property)
                 rdf_property.__dict__["domain"] = class_obj.targetClass
                 rdf_property.__dict__["domain_short"] = g.namespace_manager.normalizeUri(class_obj.targetClass)
@@ -144,7 +151,7 @@ def add_to_context(uri):
                             if label:
                                 rdf_property.label = label
                             description = g.value(o1, DC.description)
-                            if description:
+                            if not rdf_property.description and description:
                                 rdf_property.description = description
                             comment = g.value(o1, RDFS.comment)
                             if comment:
@@ -167,13 +174,15 @@ def fill_object(obj):
         obj.__dict__[short_name(p1)] = o1
 
 
-def load_examples(parent_folder, white_list=None):
+def load_examples(parent_folder, white_list=None, black_list=None):
     examples = []
     # Loop through each child folder in the parent folder
     for child_folder_name in os.listdir(parent_folder):
         
         child_folder_path = os.path.join(parent_folder, child_folder_name)
-        if os.path.isdir(child_folder_path) and (white_list is None or child_folder_name in white_list):
+        wl_ok = (white_list is None or child_folder_name in white_list)
+        bl_ok = (black_list is None or child_folder_name not in black_list)
+        if os.path.isdir(child_folder_path) and wl_ok and bl_ok:
             #print(f'PROCESS: {child_folder_name}')
             formatted_name = child_folder_name.replace('-', ' ').title()
             example = Example(name=formatted_name)
@@ -194,38 +203,42 @@ def load_examples(parent_folder, white_list=None):
     return examples
 
 
-# Add classes and properties to the context
-for class_uri in g.subjects():
-    add_to_context(class_uri)
+def main():
+    classes = {}
+    for class_uri in g.subjects():
+        add_to_context(class_uri, classes)
 
-json_ld_context = dict(context)
-dcat_g = Graph()
-dcat_g.parse('https://www.w3.org/ns/dcat2.ttl', format='ttl')
-for uri in dcat_g.subjects():
-    name = short_name(uri)
-    if name not in json_ld_context:
-        types = list(dcat_g.objects(uri, RDF.type))
-        if OWL.ObjectProperty in types:
-            for s, p, o in dcat_g.triples((uri, RDFS.range, None)):
-                json_ld_context[name] = {"@id": str(uri), "@type": str(o)}
-        elif OWL.DatatypeProperty in types:
-            for s, p, o in dcat_g.triples((uri, RDFS.range, None)):
-                json_ld_context[name] = {"@id": str(uri), "@type": str(o)}
+    json_ld_context = dict(context)
+    dcat_g = Graph()
+    dcat_g.parse('https://www.w3.org/ns/dcat2.ttl', format='ttl')
+    for uri in dcat_g.subjects():
+        name = short_name(uri)
+        if name not in json_ld_context:
+            types = list(dcat_g.objects(uri, RDF.type))
+            if OWL.ObjectProperty in types:
+                for s, p, o in dcat_g.triples((uri, RDFS.range, None)):
+                    json_ld_context[name] = {"@id": str(uri), "@type": str(o)}
+            elif OWL.DatatypeProperty in types:
+                for s, p, o in dcat_g.triples((uri, RDFS.range, None)):
+                    json_ld_context[name] = {"@id": str(uri), "@type": str(o)}
+    
+    json_ld = {"@context": json_ld_context}
+    
+    examples = load_examples("../examples/")
+    
+    classes = reorder_list(classes.values(), ['DataProduct', 'Port', 'DataService', 'Distribution', 'Dataset'])
+    env = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath="../docs/respec/"))
+    template = env.get_template("template.html")
+    spec = template.render(classes=classes, examples=examples)
+    
+    with open('../docs/assets/spec.html', 'w', encoding='utf-8') as f:
+        f.write(spec)
+    
+    with open('../docs/assets/dprod.jsonld', 'w', encoding='utf-8') as f:
+        json_dump = json.dumps(json_ld, indent=4)
+        # print(json_dump)
+        f.write(json_dump)
 
-json_ld = {"@context": json_ld_context}
 
-examples_filter = ["data-schema", "observability", "data-linage", "data-quality"]
-examples = load_examples("../examples/", white_list=None)
-
-classes = reorder_list(classes.values(), ['DataProduct', 'Port', 'DataService', 'Distribution', 'Dataset'])
-env = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath="../docs/respec/"))
-template = env.get_template("template.html")
-spec = template.render(classes=classes, examples=examples)
-
-with open('../docs/assets/spec.html', 'w', encoding='utf-8') as f:
-    f.write(spec)
-
-with open('../docs/assets/dprod.jsonld', 'w', encoding='utf-8') as f:
-    json_dump = json.dumps(json_ld, indent=4)
-    # print(json_dump)
-    f.write(json_dump)
+if __name__ == "__main__":
+    main()
