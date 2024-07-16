@@ -11,31 +11,39 @@
 @prefix y-prod:  <https://y.com/products/> .
 @prefix y-srv:   <https://y.com/service/> .
 
-<https://y.com/quality-measurement-B>
-        rdf:type             rdf:QualityMeasurement ;
-        rdf:computedOn       <https://y.com/products/uk-bonds/yearlyPrices> ;
-        rdf:isMeasurementOf  [ rdf:type    rdf:Metric ;
-                               rdfs:label  "Expected distribution frequency achieved"
-                             ] ;
-        rdf:value            "false" .
+<https://y.com/quality-measurement-B> a rdf:QualityMeasurement ;
+  #TODO: to be defined in dprod? not in rdf:
+  dprod:computedOn       <https://y.com/products/uk-bonds/yearlyPrices> ;
+  #TODO: to be defined in dprod? not in rdf:
+  dprod:isMeasurementOf <https://y.com/quality-measurement-B-metric> ;
+  rdf:value            "false" .
 
-<https://y.com/derived-quality-measurementA>
-        rdf:type             rdf:QualityMeasurement ;
-        rdf:computedOn       y-prod:uk-bonds ;
-        rdf:isMeasurementOf  [ rdf:type    rdf:Metric ;
-                               rdfs:label  "Number of stale datasets"
-                             ] ;
-        rdf:value            1 .
+#TODO: to be defined in dprod? not in rdf:
+<https://y.com/quality-measurement-B-metric> a dprod:Metric ;
+  rdfs:label  "Expected distribution frequency achieved" .
 
-y-prod:uk-bonds  rdf:type  dprod:DataProduct ;
-        dprod:outputPort  [ rdf:type                 dcat:DataService ;
-                            dcat:endpointURL         "https://y.com/uk-bonds/quality-report" ;
-                            dprod:isAccessServiceOf  [ rdf:type                dcat:Distribution ;
-                                                       dprod:isDistributionOf  [ rdf:type            dcat:Dataset ;
-                                                                                 dcterms:conformsTo  "https://www.w3.org/TR/vocab-dqv/#dqv:QualityMeasurement"
-                                                                               ]
-                                                     ]
-                          ] .
+<https://y.com/derived-quality-measurementA> a rdf:QualityMeasurement ;
+  #TODO: to be defined in dprod? not in rdf:
+  dprod:computedOn       y-prod:uk-bonds ;
+  #TODO: to be defined in dprod? not in rdf:
+  dprod:isMeasurementOf <https://y.com/derived-quality-measurementA-metric> ;
+  rdf:value            1 .
 
-<https://y.com/products/uk-bonds/yearlyPrices>
-        rdf:type  dcat:Dataset .
+#TODO: to be defined in dprod? not in rdf:
+<https://y.com/derived-quality-measurementA-metric> a dprod:Metric ;
+  rdfs:label  "Number of stale datasets" .
+
+y-prod:uk-bonds a dprod:DataProduct ;
+  dprod:outputPort y-prod:uk-bonds-port . 
+  
+y-prod:uk-bonds-port a dcat:DataService ;
+  dcat:endpointURL         "https://y.com/uk-bonds/quality-report" ;
+  dprod:isAccessServiceOf y-prod:uk-bonds-port-dist . 
+  
+y-prod:uk-bonds-port-dist a dcat:Distribution ;
+  dprod:isDistributionOf y-prod:uk-bonds-port-dist-ds . 
+  
+y-prod:uk-bonds-port-dist-ds a dcat:Dataset ;
+  dcterms:conformsTo  "https://www.w3.org/TR/vocab-dqv/#dqv:QualityMeasurement" .
+
+<https://y.com/products/uk-bonds/yearlyPrices> a dcat:Dataset .

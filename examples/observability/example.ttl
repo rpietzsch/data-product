@@ -11,28 +11,32 @@
 @prefix y-prod:  <https://y.com/products/> .
 @prefix y-srv:   <https://y.com/service/> .
 
-<https://y.com/products/uk-bonds/datasets/10-year>
-        rdf:type            dcat:Dataset ;
-        dcterms:conformsTo  "https://spec.edmcouncil.org/fibo/ontology/SEC/Debt/Bonds/CallableBond" .
+<https://y.com/products/uk-bonds/datasets/10-year> a dcat:Dataset ;
+  dcterms:conformsTo  "https://spec.edmcouncil.org/fibo/ontology/SEC/Debt/Bonds/CallableBond" .
 
-y-prod:uk-bonds  rdf:type  dprod:DataProduct ;
-        dprod:outputPort  <https://y.com/uk-bonds/observability-port> ;
-        dprod:outputPort  [ rdf:type                 dcat:DataService ;
-                            rdfs:label               "Main Data Port" ;
-                            dcat:endpointURL         "https://y.com/uk-10-year-bonds" ;
-                            dprod:isAccessServiceOf  [ rdf:type                dcat:Distribution ;
-                                                       dcterms:format          "https://www.iana.org/assignments/media-types/application/json" ;
-                                                       dprod:isDistributionOf  <https://y.com/products/uk-bonds/datasets/10-year>
-                                                     ]
-                          ] .
+y-prod:uk-bonds a dprod:DataProduct ;
+  dprod:outputPort  <https://y.com/uk-bonds/observability-port> ;
+  dprod:outputPort  <https://y.com/uk-10-year-bonds-port> .
+  
+<https://y.com/uk-10-year-bonds-port> a dcat:DataService ;
+  rdfs:label               "Main Data Port" ;
+  dcat:endpointURL         "https://y.com/uk-10-year-bonds" ;
+  dprod:isAccessServiceOf  <https://y.com/uk-10-year-bonds-port-dist> .
 
-<https://y.com/uk-bonds/observability-port>
-        rdf:type                 dcat:DataService ;
-        rdfs:label               "Observability Port" ;
-        dcat:endpointURL         "https://y.com/uk-bonds/observability" ;
-        dprod:isAccessServiceOf  [ rdf:type                dcat:Distribution ;
-                                   dcterms:format          "https://www.iana.org/assignments/media-types/text/turtle" ;
-                                   dprod:isDistributionOf  [ rdf:type            dcat:Dataset ;
-                                                             dcterms:conformsTo  "http://persistence.uni-leipzig.org/nlp2rdf/ontologies/rlog#Entry"
-                                                           ]
-                                 ] .
+<https://y.com/uk-10-year-bonds-port-dist> a dcat:Distribution ;
+  #dcterms:format          "https://www.iana.org/assignments/media-types/application/json" ;
+  dcterms:format          "application/json" ;
+  dprod:isDistributionOf  <https://y.com/products/uk-bonds/datasets/10-year> .
+
+<https://y.com/uk-bonds/observability-port> a dcat:DataService ;
+  rdfs:label               "Observability Port" ;
+  dcat:endpointURL         "https://y.com/uk-bonds/observability" ;
+  dprod:isAccessServiceOf  <https://y.com/uk-bonds/observability-port-dist> .
+  
+<https://y.com/uk-bonds/observability-port-dist> a dcat:Distribution ;
+  #dcterms:format          "https://www.iana.org/assignments/media-types/text/turtle" ;
+  dcterms:format          "text/turtle" ;
+  dprod:isDistributionOf  <https://y.com/uk-bonds/observability-port-dist-ds> . 
+  
+<https://y.com/uk-bonds/observability-port-dist-ds> a dcat:Dataset ;
+  dcterms:conformsTo  "http://persistence.uni-leipzig.org/nlp2rdf/ontologies/rlog#Entry" .
