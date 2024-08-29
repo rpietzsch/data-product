@@ -153,13 +153,6 @@ dprod:SecuritySchemaType
   rdfs:label "Security Schema Type" ;
 .
 
-dprod:Protocol
-  a owl:Class, rdfs:Class ;
-  dc:description "A protocol, possibly including a specific version, used for communicating with a service."@en ;
-  rdfs:isDefinedBy dprod: ;
-  rdfs:label "Protocol" ;
-.
-
 
 #############################  DPROD Properties ################
 
